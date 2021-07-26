@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox fx:id="mainPanel" minHeight="620.0" minWidth="1000.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="MainPanelController">
+    <VBox fx:id="firstBlockMainPanel" prefHeight="581" prefWidth="500">
+        <HBox alignment="CENTER" prefHeight="90" prefWidth="430" spacing="5.0">
+            <Label prefWidth="10" />
+            <Button fx:id="goToPreviousFolderInLocalStorageButton" onAction="#goToPreviousDirectoryInLocalStorage" prefWidth="100" text="Вверх" visible="false" />
+            <Label alignment="CENTER" contentDisplay="CENTER" text="Локальный диск" />
+        </HBox>
+        <HBox fx:id="upperLocalStorPanel" alignment="CENTER_LEFT" prefHeight="95" prefWidth="430">
+            <Label prefHeight="45" prefWidth="245.0" text="Имя">
+            <padding>
+               <Insets left="10.0" />
+            </padding></Label>
+            <Label prefHeight="45" prefWidth="105.0" text="Размер" />
+            <Label prefHeight="45" prefWidth="90.0" text="Изменён" />
+        </HBox>
+        <ListView fx:id="listOfLocalElements" onMouseClicked="#openDirectoryOrFile" prefHeight="570" />
+        <HBox alignment="CENTER" prefHeight="95" spacing="8">
+            <Button fx:id="localStorageUpdate" onAction="#selectAllFilesFromLocalStorage" prefHeight="30" prefWidth="150">Выбрать всё
+            </Button>
+            <Button fx:id="localStorageDelete" onAction="#initializeListOfLocalStorageItems" prefHeight="30" prefWidth="150">Обновить
+            </Button>
+            <Button fx:id="localStorageSend" onAction="#transferFilesToCloudStorage" prefHeight="30" prefWidth="150">Отправить
+            </Button>
+        </HBox>
+    </VBox>
+    <VBox fx:id="secondBlockMainPanel" prefHeight="600" prefWidth="500">
+        <HBox alignment="CENTER" prefHeight="90" prefWidth="430">
+            <Label prefWidth="20" />
+            <Button fx:id="goToPreviousFolderInCloudStorageButton" onAction="#goToPreviousDirectoryInCloudStorage" prefWidth="180" visible="false" />
+            <Label alignment="CENTER" prefWidth="540" text="Облако" />
+            <HBox alignment="BASELINE_RIGHT">
+                <ChoiceBox fx:id="menu" onAction="#goToOpeningPanelToChangeProfileOrLeaveApp" prefHeight="35" value="Item1">
+                    <items>
+                        <FXCollections fx:factory="observableArrayList">
+                            <String fx:value="Сменить пользователя" />
+                            <String fx:value="Выход" />
+                        </FXCollections>
+                    </items>
+                </ChoiceBox>
+            </HBox>
+        </HBox>
+        <HBox fx:id="upperLocalStorPanel1" prefHeight="92.5" prefWidth="430">
+            <Label prefHeight="45.0" prefWidth="245.0" text="Имя">
+            <padding>
+               <Insets left="10.0" />
+            </padding></Label>
+            <Label prefHeight="45.0" prefWidth="105.0" text="Размер" />
+            <Label prefHeight="45.0" prefWidth="90.0" text="Изменён" />
+        </HBox>
+        <ListView fx:id="listOfCloudStorageElements" onMouseClicked="#goToNextDirectoryInCloudStorageOnDoubleClick" prefHeight="569.5" prefWidth="430">
+        </ListView>
+        <HBox alignment="CENTER" prefHeight="94" spacing="8">
+            <Button fx:id="cloudStorageDownload" onAction="#downloadFilesIntoLocalStorage" prefHeight="30" prefWidth="150">Загрузить
+            </Button>
+            <Button fx:id="cloudStorageDelete" onAction="#selectAllFilesFromCloudStorage" prefHeight="30" prefWidth="150">Выбрать всё
+            </Button>
+            <Button fx:id="cloudStorageUpdate" onAction="#updateCloudStoragePanel" prefHeight="30" prefWidth="150">
+                Обновить
+            </Button>
+        </HBox>
+    </VBox>
+</HBox>

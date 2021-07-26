@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox fx:id="localStorageItemCell" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      prefWidth="430.0">
+    <HBox fx:id="filesDescriptionLocal">
+        <Label fx:id="localItemName" prefWidth="240"></Label>
+        <Label fx:id="localItemSize" prefWidth="110"></Label>
+        <Label fx:id="localItemModified" prefWidth="150"></Label>
+    </HBox>
+</VBox>

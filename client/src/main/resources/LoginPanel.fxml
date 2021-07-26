@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="5.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="LoginPanel">
+    <VBox alignment="CENTER" spacing="5.0">
+        <Label fx:id="messageToUser" />
+        <TextField fx:id="loginField" focusTraversable="false" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Введите логин..." />
+        <PasswordField fx:id="passwordField" focusTraversable="false" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Введите пароль..." />
+        <Button fx:id="entryButton" onAction="#sendAuthMessage" prefWidth="130">Вход</Button>
+        <Button fx:id="registrationButton" onAction="#showRegistrationForms" prefWidth="130">Регистрация</Button>
+        <Label fx:id="registrationSuccessNotification" text="Вы зарегистрированы!" visible="false" />
+        <Button fx:id="cancelRegistrationButton" onAction="#cancelRegistration" prefWidth="130" visible="false">Отмена
+        </Button>
+    </VBox>
+    <VBox fx:id="registrationBlock" alignment="CENTER" spacing="5.0" visible="false">
+        <Label fx:id="registrationMessage" />
+        <TextField fx:id="registrationLoginForm" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Придумайте логин..." />
+        <PasswordField fx:id="registrationPassForm" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Придумайте пароль..." />
+        <PasswordField fx:id="repeatPassForm" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Повторите пароль..." />
+        <Button fx:id="finalRegistrationButton" onAction="#sendRegMessageToServer" prefWidth="130" visible="false">
+            Регистрация
+        </Button>
+    </VBox>
+    <padding>
+        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+    </padding>
+</VBox>
