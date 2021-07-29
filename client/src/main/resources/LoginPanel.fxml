@@ -4,11 +4,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="5.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="LoginPanel">
+<VBox alignment="CENTER" prefHeight="366.0" prefWidth="240.0" spacing="5.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginPanel">
     <VBox alignment="CENTER" spacing="5.0">
         <Label fx:id="messageToUser" />
         <TextField fx:id="loginField" focusTraversable="false" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Введите логин..." />
-        <PasswordField fx:id="passwordField" focusTraversable="false" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Введите пароль..." />
+        <PasswordField fx:id="passwordField" focusTraversable="false" maxHeight="30.0" maxWidth="230.0" onAction="#sendAuthMessage" prefHeight="30" prefWidth="230" promptText="Введите пароль..." />
         <Button fx:id="entryButton" onAction="#sendAuthMessage" prefWidth="130">Вход</Button>
         <Button fx:id="registrationButton" onAction="#showRegistrationForms" prefWidth="130">Регистрация</Button>
         <Label fx:id="registrationSuccessNotification" text="Вы зарегистрированы!" visible="false" />

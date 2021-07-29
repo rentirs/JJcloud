@@ -11,7 +11,7 @@ public class Client extends Application {
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("./LoginPanel.fxml"));
         primaryStage.setTitle("Облако JJ");
-        primaryStage.setScene(new Scene(root, 1000, 620));
+        primaryStage.setScene(new Scene(root));
         primaryStage.setResizable(false);
         primaryStage.show();
     }

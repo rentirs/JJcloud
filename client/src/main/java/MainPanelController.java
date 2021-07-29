@@ -28,7 +28,7 @@ public class MainPanelController implements Initializable {
     private int cloudStorageFolderLevelCounter = 0;
     private HashMap<Integer, LinkedList<File>> folderCloudStorageListViews;
     private LinkedList<File> pathsToCloudStorageFiles;
-    private String watchableDirectory = "client" + File.separator + "localDirectory";
+    private String watchableDirectory = "client/localDirectory";
     private String currentDirectoryName = "";
     AudioClip soundOfFolderOpening = new AudioClip(this.getClass().getResource("foldersound.mp3").toExternalForm());
 
@@ -45,11 +45,13 @@ public class MainPanelController implements Initializable {
     @FXML
     Button cloudStorageUpdate;
     @FXML
-    Button goToPreviousFolderInLocalStorageButton;
+    Button upButtonLocal;
     @FXML
-    Button goToPreviousFolderInCloudStorageButton;
+    Button upButtonServer;
     @FXML
     Button localStorageDelete;
+    @FXML
+    ComboBox<String> disksBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -110,6 +112,14 @@ public class MainPanelController implements Initializable {
     });
 
     public void initializeListOfLocalStorageItems() {
+        
+        disksBox.getItems().clear();
+        for (Path p : FileSystems.getDefault().getRootDirectories()) {
+            disksBox.getItems().add(p.toString());
+        }
+        disksBox.getSelectionModel().select(0);
+
+
         ObservableList<StorageItem> listOfLocalItems = FXCollections.observableArrayList();
         File pathToLocalStorage = new File(watchableDirectory);
         File[] listOfLocalStorageFiles = pathToLocalStorage.listFiles();
@@ -121,11 +131,7 @@ public class MainPanelController implements Initializable {
                 long initialSizeOfLocalFileOrDirectory = 0;
                 String nameOfLocalFileOrDirectory = listOfLocalStorageFiles[i].getName();
                 if (listOfLocalStorageFiles[i].isDirectory()) {
-                    try {
-                        initialSizeOfLocalFileOrDirectory = getActualSizeOfFolder(listOfLocalStorageFiles[i]);
-                    } catch (Exception e) {
-                        log.error("Error: ", e);
-                    }
+                        initialSizeOfLocalFileOrDirectory = 0;
                 } else {
                     initialSizeOfLocalFileOrDirectory = listOfLocalStorageFiles[i].length();
                 }
@@ -144,7 +150,6 @@ public class MainPanelController implements Initializable {
     public void initializeListOfCloudStorageItems(HashMap<Integer, LinkedList<File>> listOfCloudStorageFiles) {
         if (cloudStorageFolderLevelCounter > 0) {
             cloudStorageFolderLevelCounter = 0;
-            goToPreviousFolderInCloudStorageButton.setVisible(false);
         }
         try {
             ObservableList<StorageItem> listOfCloudItems = FXCollections.observableArrayList();
@@ -153,11 +158,7 @@ public class MainPanelController implements Initializable {
                     long initialSizeOfCloudFileOrDir = 0;
                     String nameOfCloudFileOrDir = listOfCloudStorageFiles.get(0).get(i).getName();
                     if (listOfCloudStorageFiles.get(0).get(i).isDirectory()) {
-                        try {
-                            initialSizeOfCloudFileOrDir = getActualSizeOfFolder(listOfCloudStorageFiles.get(0).get(i));
-                        } catch (Exception e) {
-                            log.error("Error: ", e);
-                        }
+                            initialSizeOfCloudFileOrDir = 0;
                     } else {
                         initialSizeOfCloudFileOrDir = listOfCloudStorageFiles.get(0).get(i).length();
                     }
@@ -177,6 +178,7 @@ public class MainPanelController implements Initializable {
         }
     }
 
+
     public void openDirectoryOrFile(MouseEvent mouseEvent) {
         if (mouseEvent.getClickCount() == 1 && mouseEvent.getButton() == MouseButton.PRIMARY) {
             listOfLocalElements.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -191,9 +193,6 @@ public class MainPanelController implements Initializable {
                     } else if (nextDirectory.length != 0) {
                         playSoundOfFolderOpening();
                         localStorageFolderLevelCounter++;
-                        if (localStorageFolderLevelCounter > 0) {
-                            goToPreviousFolderInLocalStorageButton.setVisible(true);
-                        }
                         if (localStorageFolderLevelCounter > 0 && nextDirectory.length != 0) {
                             watchableDirectory += File.separator + pathToClickedFile.getName();
                             currentDirectoryName = pathToClickedFile.getName();
@@ -206,7 +205,7 @@ public class MainPanelController implements Initializable {
                             long initialSizeOfLocalFileOrDirectory = 0;
                             try {
                                 if (nextDirectory[i].isDirectory()) {
-                                    initialSizeOfLocalFileOrDirectory = getActualSizeOfFolder(nextDirectory[i]);
+                                    initialSizeOfLocalFileOrDirectory = 0;
                                 } else {
                                     initialSizeOfLocalFileOrDirectory = nextDirectory[i].length();
                                 }
@@ -239,48 +238,49 @@ public class MainPanelController implements Initializable {
         }
     }
 
-    public void goToPreviousDirectoryInLocalStorage() {
+    public void upLocal() {
         playSoundOfFolderOpening();
         ObservableList<StorageItem> listOfLocalItems = FXCollections.observableArrayList();
         LinkedList<File> files = new LinkedList<>();
         File file = new File(watchableDirectory);
-        File previousDirectory = new File(file.getParent());
-        File[] contentsOfPreviousDirectory = previousDirectory.listFiles();
-        for (int i = 0; i < contentsOfPreviousDirectory.length; i++) {
-            files.add((contentsOfPreviousDirectory[i]));
-        }
-        for (int i = 0; i < files.size(); i++) {
-            String nameOfLocalFileOrDirectory = files.get(i).getName();
-            long initialSizeOfLocalFileOrDirectory = 0;
-            try {
-                if (files.get(i).isDirectory()) {
-                    initialSizeOfLocalFileOrDirectory = getActualSizeOfFolder(files.get(i));
-                } else {
-                    initialSizeOfLocalFileOrDirectory = files.get(i).length();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (file.getParent() != null) {
+            File upperPath = new File(file.getParent());
+            File[] upperDirectory = upperPath.listFiles();
+            for (int i = 0; i < upperDirectory.length; i++) {
+                files.add((upperDirectory[i]));
             }
-            String dateOfLastModification = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                    .format(new Date(files.get(i).lastModified()));
-            File pathOfFileInLocalStorage = files.get(i).getAbsoluteFile();
-            listOfLocalItems.addAll(new StorageItem(nameOfLocalFileOrDirectory, initialSizeOfLocalFileOrDirectory, false, dateOfLastModification, pathOfFileInLocalStorage
-            ));
-        }
-        listOfLocalElements.setItems(listOfLocalItems);
-        listOfLocalElements.setCellFactory(param -> new StorageListViewItem());
-        localStorageFolderLevelCounter--;
-        if (localStorageFolderLevelCounter <= 0) {
-            goToPreviousFolderInLocalStorageButton.setVisible(false);
-            watchableDirectory = "client" + File.separator + "localDirectory";
-            currentDirectoryName = "localDirectory";
-        } else {
-            watchableDirectory = previousDirectory.toString();
-            currentDirectoryName = previousDirectory.getName();
+            for (int i = 0; i < files.size(); i++) {
+                String nameOfLocalFileOrDirectory = files.get(i).getName();
+                long initialSizeOfLocalFileOrDirectory = 0;
+                try {
+                    if (files.get(i).isDirectory()) {
+                        initialSizeOfLocalFileOrDirectory = 0;
+                    } else {
+                        initialSizeOfLocalFileOrDirectory = files.get(i).length();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String dateOfLastModification = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                        .format(new Date(files.get(i).lastModified()));
+                File pathOfFileInLocalStorage = files.get(i).getAbsoluteFile();
+                listOfLocalItems.addAll(new StorageItem(nameOfLocalFileOrDirectory, initialSizeOfLocalFileOrDirectory, false, dateOfLastModification, pathOfFileInLocalStorage
+                ));
+            }
+            listOfLocalElements.setItems(listOfLocalItems);
+            listOfLocalElements.setCellFactory(param -> new StorageListViewItem());
+            localStorageFolderLevelCounter--;
+            if (localStorageFolderLevelCounter <= 0) {
+                watchableDirectory = "client" + File.separator + "localDirectory";
+                currentDirectoryName = "localDirectory";
+            } else {
+                watchableDirectory = upperPath.toString();
+                currentDirectoryName = upperPath.getName();
+            }
         }
     }
 
-    public void goToNextDirectoryInCloudStorageOnDoubleClick(MouseEvent mouseEvent) {
+    public void openServerDir(MouseEvent mouseEvent) {
         pathsToCloudStorageFiles = new LinkedList<>();
         if (mouseEvent.getClickCount() == 1) {
             listOfCloudStorageElements.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -320,38 +320,40 @@ public class MainPanelController implements Initializable {
                         }
                     }
                     if (cloudStorageFolderLevelCounter > 0) {
-                        goToPreviousFolderInCloudStorageButton.setVisible(true);
+                        upButtonServer.setVisible(true);
                     }
                 }
             }
         }
     }
 
-    public void goToPreviousDirectoryInCloudStorage(ActionEvent event) {
+    public void upServer(ActionEvent event) {
         ObservableList<StorageItem> listOfCloudItems = FXCollections.observableArrayList();
         LinkedList<File> files = new LinkedList<>();
-        for (int i = 0; i < folderCloudStorageListViews.get(cloudStorageFolderLevelCounter - 1).size(); i++) {
-            files.add((folderCloudStorageListViews.get(cloudStorageFolderLevelCounter - 1).get(i)));
+        if (cloudStorageFolderLevelCounter > 0) {
+            for (int i = 0; i < folderCloudStorageListViews.get(cloudStorageFolderLevelCounter - 1).size(); i++) {
+                files.add((folderCloudStorageListViews.get(cloudStorageFolderLevelCounter - 1).get(i)));
+            }
+            for (int i = 0; i < files.size(); i++) {
+                String nameOfLocalFileOrDirectory = files.get(i).getName();
+                long initialSizeOfLocalFileOrDirectory = files.get(i).length();
+                String dateOfLastModification = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
+                        .format(new Date(files.get(i).lastModified()));
+                File pathToFileInCloudStorage = new File(files.get(i).getAbsolutePath());
+                listOfCloudItems.addAll(new StorageItem(nameOfLocalFileOrDirectory, initialSizeOfLocalFileOrDirectory, false, dateOfLastModification, pathToFileInCloudStorage));
+            }
+            listOfCloudStorageElements.setItems(listOfCloudItems);
+            listOfCloudStorageElements.setCellFactory(param -> new StorageListViewItem());
+            folderCloudStorageListViews.remove(cloudStorageFolderLevelCounter);
+            cloudStorageFolderLevelCounter--;
+            if (cloudStorageFolderLevelCounter <= 0) {
+                upButtonServer.setVisible(false);
+            }
+            playSoundOfFolderOpening();
         }
-        for (int i = 0; i < files.size(); i++) {
-            String nameOfLocalFileOrDirectory = files.get(i).getName();
-            long initialSizeOfLocalFileOrDirectory = files.get(i).length();
-            String dateOfLastModification = new java.text.SimpleDateFormat("dd.MM.yyyy HH:mm:ss")
-                    .format(new Date(files.get(i).lastModified()));
-            File pathToFileInCloudStorage = new File(files.get(i).getAbsolutePath());
-            listOfCloudItems.addAll(new StorageItem(nameOfLocalFileOrDirectory, initialSizeOfLocalFileOrDirectory, false, dateOfLastModification, pathToFileInCloudStorage));
-        }
-        listOfCloudStorageElements.setItems(listOfCloudItems);
-        listOfCloudStorageElements.setCellFactory(param -> new StorageListViewItem());
-        folderCloudStorageListViews.remove(cloudStorageFolderLevelCounter);
-        cloudStorageFolderLevelCounter--;
-        if (cloudStorageFolderLevelCounter <= 0) {
-            goToPreviousFolderInCloudStorageButton.setVisible(false);
-        }
-        playSoundOfFolderOpening();
     }
 
-    public LinkedList getPathsOfSelectedFilesInLocalStorage() {
+    public LinkedList<File> getPathsOfSelectedFilesInLocalStorage() {
         try {
             listOfLocalElements.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             LinkedList<File> listOfSelectedElementsInLocalStorage = new LinkedList<>();
@@ -367,7 +369,7 @@ public class MainPanelController implements Initializable {
         return null;
     }
 
-    public LinkedList getPathsOfSelectedFilesInCloudStorage() {
+    public LinkedList<File> getPathsOfSelectedFilesInCloudStorage() {
         listOfCloudStorageElements.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         LinkedList<File> listOfSelectedElementsInCloudStorage = new LinkedList<File>();
         if (listOfCloudStorageElements.getSelectionModel().getSelectedItems().size() != 0) {
@@ -452,6 +454,7 @@ public class MainPanelController implements Initializable {
         }
     }
 
+/*
     public static long getActualSizeOfFolder(File file) {
         long actualSizeOfFolder = 0;
         if (file.isDirectory()) {
@@ -465,6 +468,7 @@ public class MainPanelController implements Initializable {
         }
         return actualSizeOfFolder;
     }
+*/
 
     public void downloadFilesIntoLocalStorage() {
         ConnectionServer.sendFileRequest(getPathsOfSelectedFilesInCloudStorage());
@@ -474,14 +478,14 @@ public class MainPanelController implements Initializable {
         ConnectionServer.transferFilesToCloudStorage(CurrentLogin.getCurrentLogin(), getPathsOfSelectedFilesInLocalStorage());
     }
 
-    public void goToOpeningPanelToChangeProfileOrLeaveApp() {
+    public void changeUserOrExit() {
         if (menu.getSelectionModel().getSelectedItem().toString().equals("Сменить пользователя")) {
             try {
                 Stage stage;
                 Parent root;
                 stage = (Stage) menu.getScene().getWindow();
                 root = FXMLLoader.load(getClass().getResource("/LoginPanel.fxml"));
-                Scene scene = new Scene(root, 400, 400);
+                Scene scene = new Scene(root);
                 stage.setScene(scene);
                 stage.setResizable(false);
                 stage.setTitle("Облако JJ");
@@ -500,5 +504,10 @@ public class MainPanelController implements Initializable {
     public void playSoundOfFolderOpening() {
         soundOfFolderOpening.setVolume(0.2);
         soundOfFolderOpening.play();
+    }
+
+    public void selectDisk(ActionEvent actionEvent) {
+        ComboBox<String> element = (ComboBox<String>) actionEvent.getSource();
+
     }
 }
