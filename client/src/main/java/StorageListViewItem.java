@@ -3,7 +3,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-import java.awt.*;
 import java.io.IOException;
 
 public class StorageListViewItem extends ListCell<StorageItem> {
@@ -48,7 +47,7 @@ public class StorageListViewItem extends ListCell<StorageItem> {
                 localItemModified.setText("" + item.getLastModificationDate());
             }
             setGraphic(localStorageItemCell);
-        }catch (NullPointerException e){
+        } catch (NullPointerException ignored){
         }
     }
 }

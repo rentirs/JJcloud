@@ -14,95 +14,93 @@ public class CommandHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        log.info("Получена команда: " + msg);
-        if (msg != null) {
-            if (msg instanceof UpdateMessage) {
-                UpdateMessage updateMessage = (UpdateMessage) msg;
-                String receivedLogin = updateMessage.getLogin();
-                ctx.writeAndFlush(new UpdateMessage(getContentsOfCloudStorage(receivedLogin)));
-            } else if (msg instanceof DeletionMessage) {
-                DeletionMessage deletionMessage = (DeletionMessage) msg;
-                for (int i = 0; i < deletionMessage.getFilesToDelete().size(); i++) {
-                    File fileToDelete = new File(deletionMessage.getFilesToDelete().get(i).getAbsolutePath());
-                    if (fileToDelete.isDirectory()) {
-                        CommandHandler.deleteRecursively(fileToDelete);
-                    } else {
-                        fileToDelete.delete();
-                    }
-                }
-                deletionMessage.getFilesToDelete().clear();
-                if (deletionMessage.getFilesToDelete().isEmpty()) {
-                    ctx.writeAndFlush(new UpdateMessage(getContentsOfCloudStorage(deletionMessage.getLogin())));
+        log.info("Получена команда: " + msg.toString().substring(0, msg.toString().indexOf("@")));
+        if (msg instanceof UpdateMessage) {
+            UpdateMessage updateMessage = (UpdateMessage) msg;
+            String receivedLogin = updateMessage.getLogin();
+            ctx.writeAndFlush(new UpdateMessage(getContentsOfCloudStorage(receivedLogin)));
+        } else if (msg instanceof DeletionMessage) {
+            DeletionMessage deletionMessage = (DeletionMessage) msg;
+            for (int i = 0; i < deletionMessage.getFilesToDelete().size(); i++) {
+                File fileToDelete = new File(deletionMessage.getFilesToDelete().get(i).getAbsolutePath());
+                if (fileToDelete.isDirectory()) {
+                    CommandHandler.deleteRecursively(fileToDelete);
                 } else {
-                    ctx.writeAndFlush("DeletionFailure");
+                    fileToDelete.delete();
                 }
-            } else if (msg instanceof FileRequest) {
-                FileRequest fileRequest = (FileRequest) msg;
-                for (int i = 0; i < fileRequest.getFilesToRequest().size(); i++) {
-                    File file = new File(fileRequest.getFilesToRequest().get(i).getAbsolutePath());
-                    Path fileToRequest = Paths.get(fileRequest.getFilesToRequest().get(i).getAbsolutePath());
-                    try {
-                        if (file.isDirectory()) {
-                            if (file.listFiles().length == 0) {
-                                ctx.writeAndFlush(new FileMessage(file.getName(), true, true));
-                            } else {
-                                ctx.writeAndFlush(new FileMessage(file.getName(), true, false));
-                            }
-                        } else {
-                            try {
-                                ctx.writeAndFlush(new FileMessage(fileToRequest));
-                            } catch (AccessDeniedException e) {
-                                log.error("Error: ", e);
-                            }
-                        }
-                    } catch (IOException e) {
-                        log.error("Error: ", e);
-                    }
-                }
-            } else if (msg instanceof FileMessage) {
-                FileMessage fileMessage = (FileMessage) msg;
-                Path pathToNewFile = Paths.get("server/serverDirectory/" + fileMessage.getLogin() + File.separator + fileMessage.getFileName());
-                if (fileMessage.isDirectory() && fileMessage.isEmpty()) {
-                    if (Files.exists(pathToNewFile)) {
-                        log.info("Файл с именем " + pathToNewFile.getFileName() + " уже существует");
-                    } else {
-                        Files.createDirectory(pathToNewFile);
-                    }
-                } else {
-                    if (Files.exists(pathToNewFile)) {
-                        log.info("Файл с именем " + pathToNewFile.getFileName() + " уже существует");
-                    } else {
-                        Files.write(Paths.get("server/serverDirectory/" + fileMessage.getLogin() + File.separator + fileMessage.getFileName()), fileMessage.getData(), StandardOpenOption.CREATE);
-                    }
-                }
-                ctx.writeAndFlush(new UpdateMessage(getContentsOfCloudStorage(fileMessage.getLogin())));
-            } else if (msg instanceof AuthMessage) {
-                AuthMessage authMessage = (AuthMessage) msg;
-                DBaseHandler.getConnectionWithDB();
-                if (DBaseHandler.checkUserExists(authMessage.getLogin())) {
-                    if (DBaseHandler.checkPassword(authMessage.getLogin(), authMessage.getPassword())) {
-                        ctx.writeAndFlush("userIsValid/" + authMessage.getLogin());
-                    } else {
-                        ctx.writeAndFlush("wrongPassword");
-                    }
-                } else {
-                    ctx.writeAndFlush("userDoesNotExist");
-                }
-                DBaseHandler.disconnectDB();
-            } else if (msg instanceof RegistrationMessage) {
-                RegistrationMessage registrationMessage = (RegistrationMessage) msg;
-                DBaseHandler.getConnectionWithDB();
-                if (DBaseHandler.checkUserExists(registrationMessage.getLogin())) {
-                    ctx.writeAndFlush("userAlreadyExists");
-                } else {
-                    if (DBaseHandler.register(registrationMessage.getLogin(), registrationMessage.getPassword())) {
-                        File newDirectory = new File("server/serverDirectory/" + registrationMessage.getLogin());
-                        newDirectory.mkdir();
-                        ctx.writeAndFlush("registrationIsSuccessful");
-                    }
-                }
-                DBaseHandler.disconnectDB();
             }
+            deletionMessage.getFilesToDelete().clear();
+            if (deletionMessage.getFilesToDelete().isEmpty()) {
+                ctx.writeAndFlush(new UpdateMessage(getContentsOfCloudStorage(deletionMessage.getLogin())));
+            } else {
+                ctx.writeAndFlush("DeletionFailure");
+            }
+        } else if (msg instanceof FileRequest) {
+            FileRequest fileRequest = (FileRequest) msg;
+            for (int i = 0; i < fileRequest.getFilesToRequest().size(); i++) {
+                File file = new File(fileRequest.getFilesToRequest().get(i).getAbsolutePath());
+                Path fileToRequest = Paths.get(fileRequest.getFilesToRequest().get(i).getAbsolutePath());
+                try {
+                    if (file.isDirectory()) {
+                        if (file.listFiles().length == 0) {
+                            ctx.writeAndFlush(new FileMessage(file.getName(), true, true));
+                        } else {
+                            ctx.writeAndFlush(new FileMessage(file.getName(), true, false));
+                        }
+                    } else {
+                        try {
+                            ctx.writeAndFlush(new FileMessage(fileToRequest));
+                        } catch (AccessDeniedException e) {
+                            log.error("Error: ", e);
+                        }
+                    }
+                } catch (IOException e) {
+                    log.error("Error: ", e);
+                }
+            }
+        } else if (msg instanceof FileMessage) {
+            FileMessage fileMessage = (FileMessage) msg;
+            Path pathToNewFile = Paths.get("server/serverDirectory/" + fileMessage.getLogin() + File.separator + fileMessage.getFileName());
+            if (fileMessage.isDirectory() && fileMessage.isEmpty()) {
+                if (Files.exists(pathToNewFile)) {
+                    log.info("Директория с именем " + pathToNewFile.getFileName() + " уже существует");
+                } else {
+                    Files.createDirectory(pathToNewFile);
+                }
+            } else {
+                if (Files.exists(pathToNewFile)) {
+                    log.info("Файл с именем " + pathToNewFile.getFileName() + " уже существует");
+                } else {
+                    Files.write(Paths.get("server/serverDirectory/" + fileMessage.getLogin() + File.separator + fileMessage.getFileName()), fileMessage.getData(), StandardOpenOption.CREATE);
+                }
+            }
+            ctx.writeAndFlush(new UpdateMessage(getContentsOfCloudStorage(fileMessage.getLogin())));
+        } else if (msg instanceof AuthMessage) {
+            AuthMessage authMessage = (AuthMessage) msg;
+            DBaseHandler.getConnectionWithDB();
+            if (DBaseHandler.checkUserExists(authMessage.getLogin())) {
+                if (DBaseHandler.checkPassword(authMessage.getLogin(), authMessage.getPassword())) {
+                    ctx.writeAndFlush("userIsValid/" + authMessage.getLogin());
+                } else {
+                    ctx.writeAndFlush("wrongPassword");
+                }
+            } else {
+                ctx.writeAndFlush("userDoesNotExist");
+            }
+            DBaseHandler.disconnectDB();
+        } else if (msg instanceof RegistrationMessage) {
+            RegistrationMessage registrationMessage = (RegistrationMessage) msg;
+            DBaseHandler.getConnectionWithDB();
+            if (DBaseHandler.checkUserExists(registrationMessage.getLogin())) {
+                ctx.writeAndFlush("userAlreadyExists");
+            } else {
+                if (DBaseHandler.register(registrationMessage.getLogin(), registrationMessage.getPassword())) {
+                    File newDirectory = new File("server/serverDirectory/" + registrationMessage.getLogin());
+                    newDirectory.mkdir();
+                    ctx.writeAndFlush("registrationIsSuccessful");
+                }
+            }
+            DBaseHandler.disconnectDB();
         }
     }
 
@@ -135,16 +133,12 @@ public class CommandHandler extends ChannelInboundHandlerAdapter {
 
     public static HashMap<Integer, LinkedList<File>> getContentsOfCloudStorage(String login) {
         HashMap<Integer, LinkedList<File>> cloudStorageContents;
-        LinkedList<File> listCloudStorageFiles = new LinkedList<>();
         File path = new File("server/serverDirectory/" + login);
         File[] files = path.listFiles();
         cloudStorageContents = new HashMap<>();
         if (files.length == 0) {
-            cloudStorageContents.clear();
         } else {
-            listCloudStorageFiles.clear();
-            listCloudStorageFiles.addAll(Arrays.asList(files));
-            cloudStorageContents.clear();
+            LinkedList<File> listCloudStorageFiles = new LinkedList<>(Arrays.asList(files));
             cloudStorageContents.put(0, listCloudStorageFiles);
         }
         return cloudStorageContents;

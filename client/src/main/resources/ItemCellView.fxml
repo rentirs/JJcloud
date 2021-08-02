@@ -1,14 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<VBox fx:id="localStorageItemCell" xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      prefWidth="430.0">
-    <HBox fx:id="filesDescriptionLocal">
-        <Label fx:id="localItemName" prefWidth="240"></Label>
-        <Label fx:id="localItemSize" prefWidth="110"></Label>
-        <Label fx:id="localItemModified" prefWidth="150"></Label>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="localStorageItemCell" prefHeight="18.0" prefWidth="484.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml">
+    <HBox fx:id="filesDescriptionLocal" VBox.vgrow="ALWAYS">
+        <Label fx:id="localItemName" maxHeight="1.7976931348623157E308" prefWidth="267.0" style="-fx-border-color: gray;">
+         <HBox.margin>
+            <Insets />
+         </HBox.margin>
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding></Label>
+        <Label fx:id="localItemSize" alignment="CENTER_RIGHT" graphicTextGap="1.0" maxHeight="1.7976931348623157E308" prefWidth="90.0" style="-fx-border-color: gray;" textAlignment="RIGHT">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets left="1.0" right="5.0" />
+         </padding></Label>
+        <Label fx:id="localItemModified" maxHeight="1.7976931348623157E308" prefWidth="142.0" style="-fx-border-color: gray;">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <padding>
+            <Insets left="3.0" right="3.0" />
+         </padding></Label>
     </HBox>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+   <padding>
+      <Insets bottom="-3.0" left="-7.0" right="-10.0" top="-3.0" />
+   </padding>
 </VBox>

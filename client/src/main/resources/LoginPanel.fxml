@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="366.0" prefWidth="240.0" spacing="5.0" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="LoginPanel">
+<VBox alignment="CENTER" prefHeight="366.0" prefWidth="240.0" spacing="5.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="LoginPanel">
     <VBox alignment="CENTER" spacing="5.0">
         <Label fx:id="messageToUser" />
         <TextField fx:id="loginField" focusTraversable="false" maxHeight="30.0" maxWidth="230.0" prefHeight="30" prefWidth="230" promptText="Введите логин..." />

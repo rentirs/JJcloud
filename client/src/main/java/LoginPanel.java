@@ -1,5 +1,4 @@
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -14,6 +13,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class LoginPanel implements Initializable {
@@ -52,7 +52,7 @@ public class LoginPanel implements Initializable {
         OpeningPanelServerListener.start();
     }
 
-    public void showRegistrationForms(ActionEvent actionEvent) {
+    public void showRegistrationForms() {
         registrationBlock.setVisible(true);
         finalRegistrationButton.setVisible(true);
         registrationButton.setVisible(false);
@@ -60,7 +60,7 @@ public class LoginPanel implements Initializable {
         registrationSuccessNotification.setVisible(false);
     }
 
-    public void sendAuthMessage(ActionEvent actionEvent) {
+    public void sendAuthMessage() {
         if (!loginField.getText().isEmpty() && !passwordField.getText().isEmpty()) {
             ConnectionServer.sendAuthMessageToServer(loginField.getText(), passwordField.getText());
             loginField.clear();
@@ -68,7 +68,7 @@ public class LoginPanel implements Initializable {
         }
     }
 
-    public void cancelRegistration(ActionEvent actionEvent) {
+    public void cancelRegistration() {
         registrationButton.setVisible(true);
         cancelRegistrationButton.setVisible(false);
         registrationLoginForm.clear();
@@ -80,7 +80,7 @@ public class LoginPanel implements Initializable {
         registrationSuccessNotification.setVisible(false);
     }
 
-    public void sendRegMessageToServer(ActionEvent actionEvent) {
+    public void sendRegMessageToServer() {
         if (!registrationLoginForm.getText().isEmpty() && !registrationPassForm.getText().isEmpty() && !repeatPassForm.getText().isEmpty()) {
             if (registrationPassForm.getText().equals(repeatPassForm.getText())) {
                 ConnectionServer.sendRegMessageToServer(registrationLoginForm.getText(), repeatPassForm.getText());
@@ -94,7 +94,7 @@ public class LoginPanel implements Initializable {
 
     public void switchScenes(String login) throws IOException {
         Stage mainStage;
-        Parent root = FXMLLoader.load(getClass().getResource("./MainPanel.fxml"));
+        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("./MainPanel.fxml")));
         mainStage = (Stage) entryButton.getScene().getWindow();
         mainStage.setScene(new Scene(root));
         mainStage.setResizable(false);
@@ -120,6 +120,7 @@ public class LoginPanel implements Initializable {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
+            assert serverMessage != null;
             if (serverMessage.toString().startsWith("userIsValid/")) {
                 String[] receivedWords = serverMessage.toString().split("/");
                 String login = receivedWords[1];

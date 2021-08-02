@@ -19,107 +19,98 @@ public class ConnectionServer {
             outcomingStream = new ObjectEncoderOutputStream(socket.getOutputStream());
             incomingStream = new ObjectDecoderInputStream(socket.getInputStream(), 2_147_483_647);
         } catch (IOException e) {
-            e.printStackTrace();
+            Alerts.networkError();
         }
     }
 
     public static void stopConnection() {
         try {
-            outcomingStream.close();
+            if (!(outcomingStream == null))
+                outcomingStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            incomingStream.close();
+            if (!(incomingStream == null))
+                incomingStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
         try {
-            socket.close();
+            if (!(socket == null))
+                socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean sendDeletionMessage(String login, LinkedList<File> filesToDelete) {
+    public static void sendDeletionMessage(String login, LinkedList<File> filesToDelete) {
         try {
             if (!filesToDelete.isEmpty()) {
                 outcomingStream.writeObject(new DeletionMessage(login, filesToDelete));
                 outcomingStream.flush();
-                return true;
-            } else {
-                return false;
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    public static boolean transferFilesToCloudStorage(String login, LinkedList<File> filesToSendToCloud) {
+    public static void transferFilesToCloudStorage(String login, LinkedList<File> filesToSendToCloud) {
         try {
             if (!filesToSendToCloud.isEmpty()) {
-                for (int i = 0; i < filesToSendToCloud.size(); i++) {
-                    Path path = Paths.get(filesToSendToCloud.get(i).getAbsolutePath());
+                for (File file : filesToSendToCloud) {
+                    Path path = Paths.get(file.getAbsolutePath());
                     outcomingStream.writeObject(new FileMessage(login, path));
                     outcomingStream.flush();
                 }
-                return true;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    public static boolean sendUpdateMessageToServer(String login){
+    public static void sendUpdateMessageToServer(String login) {
         try {
             outcomingStream.writeObject(new UpdateMessage(login));
             outcomingStream.flush();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
-    public static boolean sendFileRequest(LinkedList<File> filesToRequest){
+
+    public static void sendFileRequest(LinkedList<File> filesToRequest) {
         try {
-            if (!filesToRequest.isEmpty()){
+            if (!filesToRequest.isEmpty()) {
                 outcomingStream.writeObject(new FileRequest(filesToRequest));
                 outcomingStream.flush();
-                return true;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
 
     }
 
-    public static boolean sendAuthMessageToServer(String login, String password) {
+    public static void sendAuthMessageToServer(String login, String password) {
         try {
-            outcomingStream.writeObject(new AuthMessage(login,password));
+            outcomingStream.writeObject(new AuthMessage(login, password));
             outcomingStream.flush();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
-    public static boolean sendRegMessageToServer(String login, String password) {
+    public static void sendRegMessageToServer(String login, String password) {
         try {
-            outcomingStream.writeObject(new RegistrationMessage(login,password));
+            outcomingStream.writeObject(new RegistrationMessage(login, password));
             outcomingStream.flush();
-            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
+
     public static Object readIncomingObject() throws IOException, ClassNotFoundException {
-        Object object = incomingStream.readObject();
-        return  object;
+        if (!(incomingStream == null)) return incomingStream.readObject();
+        return "";
     }
 }
